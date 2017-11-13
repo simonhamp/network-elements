@@ -4,22 +4,22 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "content-hash": "f18617201a7ee48486f55470b7f9838f",
+    "content-hash": "91842ac9345ca95f02183dd4c9cf3776",
     "packages": [
         {
             "name": "askedio/laravel-ratchet",
-            "version": "2.0.2",
+            "version": "2.0.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/simonhamp/laravel-ratchet.git",
-                "reference": "d469482d11685bb32a5c6cdb289ecba97c3a2b2a"
+                "reference": "37e3fccca726eeda9aa5a18f471762f9e065e879"
             },
             "require": {
                 "cboden/ratchet": "^0.4",
                 "ext-zmq": "*",
                 "graham-campbell/throttle": "^6.0",
-                "laravel/framework": "5.5.*",
-                "pelim/laravel-zmq": "^0.2",
+                "illuminate/console": "5.5.*",
+                "illuminate/support": "5.5.*",
                 "php": ">=7.1.0",
                 "react/zmq": "0.2.*|0.3.*"
             },
@@ -27,8 +27,7 @@
             "extra": {
                 "laravel": {
                     "providers": [
-                        "Askedio\\LaravelRatchet\\Providers\\LaravelRatchetServiceProvider",
-                        "Pelim\\LaravelZmq\\ZmqServiceProvider"
+                        "Askedio\\LaravelRatchet\\Providers\\LaravelRatchetServiceProvider"
                     ]
                 }
             },
@@ -44,7 +43,7 @@
             "keywords": [
                 "laravel"
             ],
-            "time": "2017-11-13T12:47:53+00:00"
+            "time": "2017-11-13T19:33:31+00:00"
         },
         {
             "name": "cboden/ratchet",
@@ -1599,11 +1598,11 @@
         },
         {
             "name": "pelim/laravel-zmq",
-            "version": "v0.2.0",
+            "version": "v0.2.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/simonhamp/laravel-zmq.git",
-                "reference": "9e2401464ba1d14ea20dffabc73aa221dd18ff7c"
+                "reference": "a08ea2151c388a8054cd0b98fe8681ec1d195ed9"
             },
             "require": {
                 "ext-zmq": "*",
@@ -1633,7 +1632,7 @@
                 }
             ],
             "description": "zmq support for Laravel 5",
-            "time": "2017-11-13T10:18:48+00:00"
+            "time": "2017-11-13T19:32:57+00:00"
         },
         {
             "name": "psr/container",
