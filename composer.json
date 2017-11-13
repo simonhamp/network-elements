@@ -1,0 +1,26 @@
+{
+    "name": "simonhamp/network-elements",
+    "description": "Network Elements. To make your Network work.",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Simon Hamp",
+            "url": "https://github.com/simonhamp"
+        }
+    ],
+    "require-dev": {
+        "laravel/framework": "5.5.*"
+    },
+    "autoload": {
+        "psr-4": {
+            "SimonHamp\\NetworkElements\\": "src/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "SimonHamp\\NetworkElements\\Providers\\ServiceProvider"
+            ]
+        }
+    }
+}
