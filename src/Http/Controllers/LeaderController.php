@@ -1,9 +1,9 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace SimonHamp\NetworkElements\Http\Controllers;
 
-use App\Leader;
 use Illuminate\Http\Request;
+use SimonHamp\NetworkElements\Models\Leader;
 
 class LeaderController extends Controller
 {
@@ -41,7 +41,7 @@ class LeaderController extends Controller
     /**
      * Display the specified resource.
      *
-     * @param  \App\Leader  $leader
+     * @param  \SimonHamp\NetworkElements\Models\Leader  $leader
      * @return \Illuminate\Http\Response
      */
     public function show(Leader $leader)
@@ -52,7 +52,7 @@ class LeaderController extends Controller
     /**
      * Show the form for editing the specified resource.
      *
-     * @param  \App\Leader  $leader
+     * @param  \SimonHamp\NetworkElements\Models\Leader  $leader
      * @return \Illuminate\Http\Response
      */
     public function edit(Leader $leader)
@@ -64,7 +64,7 @@ class LeaderController extends Controller
      * Update the specified resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Leader  $leader
+     * @param  \SimonHamp\NetworkElements\Models\Leader  $leader
      * @return \Illuminate\Http\Response
      */
     public function update(Request $request, Leader $leader)
@@ -75,7 +75,7 @@ class LeaderController extends Controller
     /**
      * Remove the specified resource from storage.
      *
-     * @param  \App\Leader  $leader
+     * @param  \SimonHamp\NetworkElements\Models\Leader  $leader
      * @return \Illuminate\Http\Response
      */
     public function destroy(Leader $leader)

@@ -2,7 +2,7 @@
 
 use Faker\Generator as Faker;
 
-$factory->define(App\Post::class, function (Faker $faker) {
+$factory->define(SimonHamp\NetworkElements\Models\Post::class, function (Faker $faker) {
     return [
         //
     ];

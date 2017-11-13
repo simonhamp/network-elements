@@ -2,7 +2,7 @@
 
 use Faker\Generator as Faker;
 
-$factory->define(App\Follower::class, function (Faker $faker) {
+$factory->define(SimonHamp\NetworkElements\Models\Follower::class, function (Faker $faker) {
     return [
         //
     ];

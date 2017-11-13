@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Http\Controllers\Auth;
+namespace SimonHamp\NetworkElements\Http\Controllers\Auth;
 
-use App\User;
-use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Validator;
+use SimonHamp\NetworkElements\Models\User;
 use Illuminate\Foundation\Auth\RegistersUsers;
+use SimonHamp\NetworkElements\Http\Controllers\Controller;
 
 class RegisterController extends Controller
 {
@@ -58,7 +58,7 @@ class RegisterController extends Controller
      * Create a new user instance after a valid registration.
      *
      * @param  array  $data
-     * @return \App\User
+     * @return \SimonHamp\NetworkElements\Models\User
      */
     protected function create(array $data)
     {

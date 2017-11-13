@@ -1,9 +1,9 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace SimonHamp\NetworkElements\Http\Controllers;
 
-use App\Follower;
 use Illuminate\Http\Request;
+use SimonHamp\NetworkElements\Models\Follower;
 
 class FollowerController extends Controller
 {
@@ -41,7 +41,7 @@ class FollowerController extends Controller
     /**
      * Display the specified resource.
      *
-     * @param  \App\Follower  $follower
+     * @param  \SimonHamp\NetworkElements\Models\Follower  $follower
      * @return \Illuminate\Http\Response
      */
     public function show(Follower $follower)
@@ -52,7 +52,7 @@ class FollowerController extends Controller
     /**
      * Show the form for editing the specified resource.
      *
-     * @param  \App\Follower  $follower
+     * @param  \SimonHamp\NetworkElements\Models\Follower  $follower
      * @return \Illuminate\Http\Response
      */
     public function edit(Follower $follower)
@@ -64,7 +64,7 @@ class FollowerController extends Controller
      * Update the specified resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Follower  $follower
+     * @param  \SimonHamp\NetworkElements\Models\Follower  $follower
      * @return \Illuminate\Http\Response
      */
     public function update(Request $request, Follower $follower)
@@ -75,7 +75,7 @@ class FollowerController extends Controller
     /**
      * Remove the specified resource from storage.
      *
-     * @param  \App\Follower  $follower
+     * @param  \SimonHamp\NetworkElements\Models\Follower  $follower
      * @return \Illuminate\Http\Response
      */
     public function destroy(Follower $follower)

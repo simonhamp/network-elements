@@ -27,7 +27,3 @@ Route::get('password/reset/{token}', 'Auth\ResetPasswordController@showResetForm
 Route::post('password/reset', 'Auth\ResetPasswordController@reset');
 
 Route::get('/home', 'HomeController@index')->name('home');
-
-Route::get('/trigger', function(){
-    event(new App\Events\OrderShipped(auth()->user()));
-})->middleware('auth');

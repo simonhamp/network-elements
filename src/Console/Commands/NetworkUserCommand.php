@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Console\Commands;
+namespace SimonHamp\NetworkElements\Console\Commands;
 
-use App\User;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Validator;
+use SimonHamp\NetworkElements\Models\User;
 use Hackzilla\PasswordGenerator\Generator\RequirementPasswordGenerator as PasswordGenerator;
 
 class NetworkUserCommand extends Command

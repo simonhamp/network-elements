@@ -1,9 +1,9 @@
 <?php
 
-namespace App\Http\Controllers\Auth;
+namespace SimonHamp\NetworkElements\Http\Controllers\Auth;
 
-use App\Http\Controllers\Controller;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
+use SimonHamp\NetworkElements\Http\Controllers\Controller;
 
 class LoginController extends Controller
 {

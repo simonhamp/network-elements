@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Console\Commands;
+namespace SimonHamp\NetworkElements\Console\Commands;
 
 use Illuminate\Console\Command;
 use Illuminate\Console\ConfirmableTrait;
