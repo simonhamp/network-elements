@@ -1,6 +1,6 @@
 <?php
 
-namespace App;
+namespace SimonHamp\NetworkElements\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
