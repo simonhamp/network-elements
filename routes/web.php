@@ -16,7 +16,7 @@ Route::namespace('\SimonHamp\NetworkElements\Http\Controllers')
     ->group(function () {
         // Public
         Route::get('/', function () {
-            return view('welcome');
+            return view('network::welcome');
         });
 
         // Authentication Routes...

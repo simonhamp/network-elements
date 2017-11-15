@@ -1,4 +1,4 @@
-@extends('layouts.app')
+@extends('network::layouts.app')
 
 @section('content')
 <div class="container">
