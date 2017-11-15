@@ -2,6 +2,8 @@
 
 namespace SimonHamp\NetworkElements\Http\Controllers\Auth;
 
+use Illuminate\Http\Request;
+use Illuminate\Validation\ValidationException;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
 use SimonHamp\NetworkElements\Http\Controllers\Controller;
 
@@ -40,5 +42,21 @@ class LoginController extends Controller
     public function showLoginForm()
     {
         return view('network::auth.login');
+    }
+
+
+    /**
+     * Get the failed login response instance.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Symfony\Component\HttpFoundation\Response
+     *
+     * @throws ValidationException
+     */
+    protected function sendFailedLoginResponse(Request $request)
+    {
+        throw ValidationException::withMessages([
+            $this->username() => [trans('network::auth.failed')],
+        ]);
     }
 }
