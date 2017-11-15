@@ -15,6 +15,7 @@ class NetworkUserCommand extends Command
      * @var string
      */
     protected $signature = 'network:user
+                        {--N|name : Set the name.}
                         {--P|generate : Generate a password.}';
 
     /**
@@ -42,12 +43,15 @@ class NetworkUserCommand extends Command
     public function handle()
     {
         start:
-        $name = $this->ask('What is your name? (Hint: just your first name is fine)');
+        $name = $this->anticipate('What name would you like to use? (Hint: just your first name is fine)', [$this->option('name')], $this->option('name'));
         $email = $this->ask('Enter an email address (Hint: it does not have to be a real account)');
+        $generate = $this->confirm('Would you like me to generate a password for you?');
 
         $show_password = false;
 
-        if ($this->option('generate')) {
+        $generate = ($this->option('generate') || $generate);
+
+        if ($generate) {
             $password = $password_confirmation = (new PasswordGenerator)->setLength(12)
                 ->setOptionValue(PasswordGenerator::OPTION_SYMBOLS, true)
                 ->setMinimumCount(PasswordGenerator::OPTION_UPPER_CASE, 1)
@@ -60,6 +64,7 @@ class NetworkUserCommand extends Command
             enter_password:
             $password = $this->secret('Set your password (must be at least 8 characters long, containing uppercase,' .
                                       'lowercase, and numeric characters)');
+
             $password_confirmation = $this->secret('Please re-type your password to confirm it');
 
             if ($password != $password_confirmation) {
@@ -91,11 +96,14 @@ class NetworkUserCommand extends Command
         }
 
         if ($user = User::create(['name' => $name, 'email' => $email, 'password' => bcrypt($password)])) {
-            $password = ($show_password ? '. Your password is: '.$password.' Do not share it with anyone!' : '');
+            $this->info("Your user account has been created!");
 
-            $this->info('Your user account has been created! '.$password);
+            if ($show_password) {
+                $this->info("Your password is: $password");
+                $this->warn("Don't share it with anyone!");
+            }
 
-            $this->line('<comment>Now login to your dashboard over at '.$this->laravel['config']['app.url'].'/login.</comment>');
+            $this->info('Now login to your dashboard over at '.$this->laravel['config']['app.url'].'/login.');
         }
     }
 }

@@ -3,8 +3,11 @@
 namespace SimonHamp\NetworkElements\Console\Commands;
 
 use Illuminate\Console\Command;
-use Illuminate\Console\ConfirmableTrait;
 use Symfony\Component\Process\Process;
+use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Console\ConfirmableTrait;
+use SimonHamp\NetworkElements\Models\User;
 
 class NetworkConfigCommand extends Command
 {
@@ -24,6 +27,23 @@ class NetworkConfigCommand extends Command
      */
     protected $description = 'Configure your network.';
 
+    protected $stage = 0;
+    protected $finalStage = 2;
+
+    protected $validConnections = [
+        'sqlite' => 'SQLite',
+        'mysql' => 'MySQL',
+        'pgsql' => 'PostgreSQL',
+        'sqlsrv' => 'Microsoft SQL Server'
+    ];
+
+    protected $defaultDbPorts = [
+        'mysql' => 3306,
+        'pgsql' => 5432,
+        'sqlsrv' => 1433,
+    ];
+
+    protected $user_name;
     protected $name;
     protected $url;
     protected $connection;
@@ -33,6 +53,11 @@ class NetworkConfigCommand extends Command
     protected $username;
     protected $password;
 
+    /**
+     * Map .env key names to local instance variable names
+     *
+     * @var array
+     */
     protected $keys = [
         'APP_NAME'      => 'name',
         'APP_URL'       => 'url',
@@ -51,11 +76,16 @@ class NetworkConfigCommand extends Command
      */
     public function handle()
     {
+        // Get the last state of the installer
+        if (Storage::exists('installer')) {
+            $this->stage = (int) Storage::get('installer');
+        }
+
+        // If it's been completed already, let's confirm
         $confirmed = $this->confirmToProceed(
-            'It looks like you have already completed config for this network.
-            Are you sure you want to configure again?',
+            'It looks like you have already completed config for this network!',
             function () {
-                return $this->laravel['config']['app.name'] !== 'Laravel';
+                return $this->isComplete();
             }
         );
 
@@ -63,82 +93,230 @@ class NetworkConfigCommand extends Command
             return;
         }
 
-        $this->name = $this->ask('What is your name?');
-
-        $this->url = $this->ask('What URL is your network accessible from?');
-
-        $this->connection = $this->choice(
-            'Which database connection are you using?',
-            [
-                'sqlite' => 'SQLite',
-                'mysql' => 'MySQL',
-                'pgsql' => 'PostgreSQL',
-                'sqlsrv' => 'Microsoft SQL Server'
-            ],
-            'sqlite'
-        );
-
-        if ($this->connection !== 'sqlite') {
-            $this->host = $this->anticipate('What host is your database on?', ['localhost', '127.0.0.1']);
-
-            $this->port = $this->anticipate('What port is your database on?', ['3306']);
-
-            $this->database = $this->ask('What is the name of the database schema you wish to use?');
-
-            $this->username = $this->ask('What is the database username?');
-
-            $this->password = $this->secret('What is the database password?');
+        // If this was previously complete, reset the stage so we can rerun everything
+        if ($this->isComplete()) {
+            $this->stage = 0;
         }
 
-        if (! $this->updateEnvironmentFile()) {
-            $this->error(".env file couldn't be updated. Please edit manually.");
+        // See if there's a file from a previous attempt
+        if (Storage::exists('temp.env')) {
+            $this->info('Loading settings from initial setup...');
+            $env = Storage::get('temp.env');
+        } else {
+            $this->runInteractiveSurvey();
+        }
+
+        // Attempt to update the environment file
+        if (! $this->updateEnvironmentFile($env ?? null)) {
+            $this->error(".env file couldn't be updated. Please check folder permissions and try again.");
 
             return;
         }
 
-        // Run migrations
-        if ($this->connection === 'sqlite') {
-            $this->createSqliteDatabase();
+        // Delete the temporary settings file
+        Storage::delete('temp.env');
 
-            $this->call('migrate');
-        } else {
-            $this->warn("Create your database: {$this->database}");
-            $this->warn("Then run database migrations: Execute `php artisan migrate`");
-        }
-
-        $this->info("Network config complete. Enjoy!");
-
-        $this->info("Now let's create your user account...");
-
-        $this->call('network:user');
+        // .env created successfully, let's finish setup
+        $this->finalizeSetup();
     }
 
+    protected function isComplete()
+    {
+        return $this->stage >= $this->finalStage;
+    }
+
+    protected function runInteractiveSurvey()
+    {
+        if ($this->stage < 1) {
+            $this->alert("Welcome to Network! To get your system set up, I just need to ask you a few questions...");
+
+            $this->user_name = $this->ask('What is your name?');
+            $this->name = $this->user_name . "'s Network";
+
+            $this->url = $this->ask('What URL is your network accessible from?');
+        }
+
+        if ($this->stage < 2) {
+            $this->database = database_path('database.sqlite');
+
+            $this->connection = $this->choice(
+                'Which database connection are you using?',
+                $this->validConnections,
+                'sqlite'
+            );
+
+            if ($this->connection !== 'sqlite') {
+                $this->host = $this->anticipate('What host is your database on?', ['localhost', '127.0.0.1'], 'localhost');
+
+                $defaultDbPort = $this->defaultDbPorts[$this->connection];
+
+                $this->port = $this->anticipate('What port is your database on?', [$defaultDbPort], $defaultDbPort);
+
+                $this->database = $this->ask('What is the name of the database you wish to use?');
+
+                $this->username = $this->ask('What is the database username?');
+
+                $this->password = $this->secret('What is the database password?');
+            }
+
+            // Adjust current config so we can use these settings in the current request
+            config([
+                'database' => [
+                    'default' => $this->connection,
+                    'connections' => [
+                        $this->connection => [
+                            'driver' => $this->connection,
+                            'host' => $this->host,
+                            'port' => $this->port,
+                            'database' => $this->database,
+                            'username' => $this->username,
+                            'password' => $this->password,
+                        ],
+                    ],
+                ],
+                'app' => [
+                    'url' => $this->url,
+                ],
+            ]);
+        }
+    }
+
+    /**
+     * Run main setup after we know we have the .env in place.
+     */
+    protected function finalizeSetup()
+    {
+        // Run migrations if possible
+        $attemptMigrate = false;
+
+        if ($this->connection === 'sqlite') {
+            $attemptMigrate = $this->createSqliteDatabase();
+        } else {
+            $attemptMigrate = $this->canConnectToDb();
+        }
+
+        sleep(1);
+
+        if ($attemptMigrate) {
+            $this->call('migrate', ['--force' => true]);
+
+            // Mark as installer complete
+            Storage::put('installer', '2');
+
+            sleep(1);
+
+            // Create the first user's account if we need to
+            if (User::count() < 1) {
+                $this->info("Now let's create your user account...");
+                $this->call('network:user', ['--name' => $this->user_name]);
+            }
+        }
+
+        // Make the symlinks we need
+        $this->createSymlinks();
+
+        sleep(1);
+
+        $this->alert("Great news, {$this->user_name}: your Network setup is complete! I hope you enjoy using your new Network.");
+    }
+
+    /**
+     * Create the SQLite database file if this is the driver the user wants to use.
+     *
+     * @return bool
+     */
     protected function createSqliteDatabase()
     {
-        $dbPath = database_path('database.sqlite');
+        $dbPath = config('database.connections.sqlite.database');
         $createDb = new Process("touch $dbPath");
         $createDb->run();
 
         if (! $createDb->isSuccessful()) {
-            $this->info("Database created at $dbPath.");
-        } else {
-            $this->info("Please create your database at $dbPath. Run `touch $dbPath`");
+            $this->warn("I couldn't create your SQLite database file.");
+            $this->warn("Please create it after setup is complete and re-run setup.");
+            $this->warn("Run `touch database/database.sqlite`");
+            Storage::put('installer', '1');
+
+            return false;
         }
+
+        $this->info("Database created at $dbPath.");
+
+        return true;
+    }
+
+    /**
+     * Check the database connection
+     *
+     * @return bool
+     */
+    protected function canConnectToDb()
+    {
+        $dbServer = $this->validConnections[$this->connection];
+
+        try {
+            // Run a simple test that will fail if the database doesn't exist
+            dump(config('database.connections.sqlite'));
+            Schema::hasTable('migrations');
+            return true;
+        } catch (\PDOException $e) {
+            $this->warn("I couldn't connect to your database: {$this->database}.");
+            $this->warn("Please create this after setup is complete and re-run setup.");
+            Storage::put('installer', '1');
+        }
+
+        return false;
     }
 
     /**
      * Write a new environment file with the given key.
      *
-     * @param  string  $key
-     * @return void
+     * @param  string  $env
+     * @return bool
      */
-    protected function updateEnvironmentFile()
+    protected function updateEnvironmentFile($env = null)
     {
-        $env = file_get_contents($this->laravel->environmentFilePath());
+        if ($env === null) {
+            $env = $this->generateEnv();
+        }
 
+        if ($env !== null) {
+            // Store the new .env file values
+            if (file_put_contents($this->laravel->environmentFilePath(), $env)) {
+                return true;
+            }
+
+            // Attempt to store settings in a separate file so the user doesn't have to repeat
+            Storage::put('temp.env', $env);
+        }
+
+        return false;
+    }
+
+    /**
+     * Generate the full .env file by replacing values from original
+     *
+     * @return string
+     */
+    protected function generateEnv()
+    {
+        $env = null;
+
+        // Get the existing .env file contents to replace
+        $envPath = $this->laravel->environmentFilePath();
+
+        if (! file_exists($envPath)) {
+            // Create the .env file from the example file
+            copy($envPath.'.example', $envPath);
+            $this->callSilent('key:generate', ['--force' => true]);
+        }
+
+        $env = file_get_contents($envPath);
+
+        // Loop over all of the keys we can set and replace the values that are set
         foreach ($this->keys as $key => $var) {
             // Skip if it's not set
-            if (! isset($this->key)) {
+            if (! isset($this->$var)) {
                 continue;
             }
 
@@ -150,7 +328,24 @@ class NetworkConfigCommand extends Command
             );
         }
 
-        return file_put_contents($this->laravel->environmentFilePath(), $env);
+        return $env;
+    }
+
+    /**
+     * Create folder symlinks
+     */
+    protected function createSymlinks()
+    {
+        // Symlink the public storage folder
+        if (! file_exists(public_path('storage'))) {
+            $this->call('storage:link');
+        }
+
+        // Symlink the public assets folder
+        $packagePublicPath = base_path('vendor/simonhamp/network-elements/public');
+        $sitePublicPath = public_path('network');
+        $createSymlink = new Process('ln -sf "'.$packagePublicPath.'" "'.$sitePublicPath.'"');
+        $createSymlink->run();
     }
 
     /**
