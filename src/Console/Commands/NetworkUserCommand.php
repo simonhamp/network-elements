@@ -2,9 +2,9 @@
 
 namespace SimonHamp\NetworkElements\Console\Commands;
 
-use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Validator;
 use SimonHamp\NetworkElements\Models\User;
+use SimonHamp\NetworkElements\Console\Command;
 use Hackzilla\PasswordGenerator\Generator\RequirementPasswordGenerator as PasswordGenerator;
 
 class NetworkUserCommand extends Command

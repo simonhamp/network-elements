@@ -2,12 +2,12 @@
 
 namespace SimonHamp\NetworkElements\Console\Commands;
 
-use Illuminate\Console\Command;
 use Symfony\Component\Process\Process;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Console\ConfirmableTrait;
 use SimonHamp\NetworkElements\Models\User;
+use SimonHamp\NetworkElements\Console\Command;
 
 class NetworkConfigCommand extends Command
 {
@@ -156,7 +156,7 @@ class NetworkConfigCommand extends Command
 
                 $this->username = $this->ask('What is the database username?');
 
-                $this->password = $this->secret('What is the database password?');
+                $this->password = $this->secret('What is the database password?', true, '');
             }
 
             // Adjust current config so we can use these settings in the current request
