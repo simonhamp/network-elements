@@ -257,7 +257,7 @@ class NetworkConfigCommand extends Command
         try {
             // Run a simple test that will fail if the database doesn't exist
             dump(config('database.connections.sqlite'));
-            Schema::hasTable('migrations');
+            Schema::connection($this->connection)->hasTable('migrations');
             return true;
         } catch (\PDOException $e) {
             $this->warn("I couldn't connect to your database: {$this->database}.");
