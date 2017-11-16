@@ -82,7 +82,7 @@
                 </div>
 
                 <div class="links">
-                    <a href="https://network.me/docs">Documentation</a>
+                    <a href="https://github.com/simonhamp/network/wiki">Documentation</a>
                     <a href="https://github.com/simonhamp/network">GitHub</a>
                 </div>
             </div>
