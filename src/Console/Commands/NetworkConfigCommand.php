@@ -29,6 +29,7 @@ class NetworkConfigCommand extends Command
 
     protected $stage = 0;
     protected $finalStage = 2;
+    protected $hasError = false;
 
     protected $validConnections = [
         'sqlite' => 'SQLite',
@@ -77,8 +78,16 @@ class NetworkConfigCommand extends Command
     public function handle()
     {
         // Get the last state of the installer
-        if (Storage::exists('installer')) {
+        if (Storage::exists('installer') && file_exists($this->laravel->environmentFilePath())) {
             $this->stage = (int) Storage::get('installer');
+
+            try {
+                $this->user_name = User::first()->name;
+            } catch (\PDOException $e) {
+                $this->user_name = str_replace("'s Network$", '', env('APP_NAME').'$');
+                $this->warn("There was a problem connecting to your Network database. Please update your connection details.");
+                $this->stage = 1;
+            }
         }
 
         // If it's been completed already, let's confirm
@@ -110,6 +119,8 @@ class NetworkConfigCommand extends Command
         if (! $this->updateEnvironmentFile($env ?? null)) {
             $this->error(".env file couldn't be updated. Please check folder permissions and try again.");
 
+            logger('NETWORK.INSTALL: Failed to update .env file');
+
             return;
         }
 
@@ -133,7 +144,11 @@ class NetworkConfigCommand extends Command
             $this->user_name = $this->ask('What is your name?');
             $this->name = $this->user_name . "'s Network";
 
-            $this->url = $this->ask('What URL is your network accessible from?');
+            $this->line("Hi {$this->user_name}! Great to have you on board :)");
+
+            $this->url = $this->ask('What URL is your network accessible from?', 'http://localhost/network');
+
+            $this->line("Site URL set to {$this->url}.");
         }
 
         if ($this->stage < 2) {
@@ -145,18 +160,27 @@ class NetworkConfigCommand extends Command
                 'sqlite'
             );
 
+            $dbServer = $this->validConnections[$this->connection];
+
+            $this->line("Database connection set to {$dbServer}.");
+
             if ($this->connection !== 'sqlite') {
-                $this->host = $this->anticipate('What host is your database on?', ['localhost', '127.0.0.1'], 'localhost');
+                $this->host = $this->anticipate('What host is your database on? (IP address or hostname)', ['localhost', '127.0.0.1'], 'localhost');
+                $this->line("Database host set to {$this->host}.");
 
                 $defaultDbPort = $this->defaultDbPorts[$this->connection];
 
                 $this->port = $this->anticipate('What port is your database on?', [$defaultDbPort], $defaultDbPort);
+                $this->line("Database port set to {$this->port}.");
 
-                $this->database = $this->ask('What is the name of the database you wish to use?');
+                $this->database = $this->ask('What is the name of the database you wish to use?', 'network');
+                $this->line("Database name is {$this->database}.");
 
-                $this->username = $this->ask('What is the database username?');
+                $this->username = $this->ask("Please enter a {$dbServer} username that has access to this database", 'root');
+                $this->line("Database user set to {$this->username}.");
 
-                $this->password = $this->secret('What is the database password?', true, '');
+                $this->password = $this->secret("What is that user's password? (Leave blank for no password)", true, true) ?? '';
+                $this->line('Database user password set.');
             }
 
             // Adjust current config so we can use these settings in the current request
@@ -217,7 +241,12 @@ class NetworkConfigCommand extends Command
 
         sleep(1);
 
-        $this->alert("Great news, {$this->user_name}: your Network setup is complete! I hope you enjoy using your new Network.");
+        if (! $this->hasError) {
+            $this->alert("Great news, {$this->user_name}: your Network is set up! I hope you enjoy using Network.");
+        } else {
+            $this->warn("Sorry, {$this->user_name}, I couldn't complete your Network setup this time.");
+            $this->warn("Please check the warning messages to see what you need to do and rerun `php artisan network:config`.");
+        }
     }
 
     /**
@@ -236,6 +265,8 @@ class NetworkConfigCommand extends Command
             $this->warn("Please create it after setup is complete and re-run setup.");
             $this->warn("Run `touch database/database.sqlite`");
             Storage::put('installer', '1');
+            logger('NETWORK.INSTALL: Failed to create SQLite database');
+            $this->hasError = true;
 
             return false;
         }
@@ -259,9 +290,11 @@ class NetworkConfigCommand extends Command
             Schema::connection($this->connection)->hasTable('migrations');
             return true;
         } catch (\PDOException $e) {
-            $this->warn("I couldn't connect to your database: {$this->database}.");
-            $this->warn("Please create this after setup is complete and re-run setup.");
+            $this->warn("I couldn't connect to a database called '{$this->database}' using the credentials you gave.");
+            $this->warn("Please make sure the database exists and check your settings then re-run `network:config`.");
             Storage::put('installer', '1');
+            logger('NETWORK.INSTALL: Failed to connect to database');
+            $this->hasError = true;
         }
 
         return false;
@@ -341,10 +374,22 @@ class NetworkConfigCommand extends Command
         }
 
         // Symlink the public assets folder
-        $packagePublicPath = base_path('vendor/simonhamp/network-elements/public');
-        $sitePublicPath = public_path('network');
-        $createSymlink = new Process('ln -sf "'.$packagePublicPath.'" "'.$sitePublicPath.'"');
-        $createSymlink->run();
+        if (! is_link($sitePath = public_path('network'))) {
+            $this->info('Symlinking public assets...');
+            $vendorPath = base_path('vendor/simonhamp/network-elements/public/');
+            $createSymlink = new Process('ln -s "'.$vendorPath.'" "'.$sitePath.'"');
+            $createSymlink->run();
+
+            if (! $createSymlink->isSuccessful()) {
+                $this->warn("I couldn't create a symlink to the Network public assets (CSS, JavaScript, fonts and images.");
+                $this->warn("Please create a symlink to {$vendorPath} at {$sitePath}");
+                logger('NETWORK.INSTALL: Failed to symlink public assets.', ['paths' => [$vendorPath, $sitePath]]);
+                $this->hasError = true;
+                return;
+            }
+
+            $this->info('Symlinking created successfully!');
+        }
     }
 
     /**
