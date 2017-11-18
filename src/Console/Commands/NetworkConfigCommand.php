@@ -198,9 +198,10 @@ class NetworkConfigCommand extends Command
                         ],
                     ],
                 ],
-                'app' => [
+                'app' => array_merge(config('app'), [
+                    'name' => $this->name,
                     'url' => $this->url,
-                ],
+                ]),
             ]);
         }
     }
@@ -222,6 +223,11 @@ class NetworkConfigCommand extends Command
         sleep(1);
 
         if ($attemptMigrate) {
+            // We need to reconnect using new settings if we're running SQLite
+            if ($this->connection === 'sqlite') {
+                app()['db']->reconnect();
+            }
+
             $this->call('migrate', ['--force' => true]);
 
             // Mark as installer complete
