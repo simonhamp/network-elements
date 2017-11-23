@@ -1,6 +1,6 @@
 <?php
 
-namespace App;
+namespace SimonHamp\NetworkElements;
 
 use Ratchet\ConnectionInterface;
 use Askedio\LaravelRatchet\RatchetWsServer as BaseServer;
