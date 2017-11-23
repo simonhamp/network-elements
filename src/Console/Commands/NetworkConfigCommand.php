@@ -33,14 +33,14 @@ class NetworkConfigCommand extends Command
 
     protected $validConnections = [
         'sqlite' => 'SQLite',
-        'mysql' => 'MySQL',
-        'pgsql' => 'PostgreSQL',
+        'mysql'  => 'MySQL',
+        'pgsql'  => 'PostgreSQL',
         'sqlsrv' => 'Microsoft SQL Server'
     ];
 
     protected $defaultDbPorts = [
-        'mysql' => 3306,
-        'pgsql' => 5432,
+        'mysql'  => 3306,
+        'pgsql'  => 5432,
         'sqlsrv' => 1433,
     ];
 
@@ -62,6 +62,7 @@ class NetworkConfigCommand extends Command
     protected $keys = [
         'APP_NAME'      => 'name',
         'APP_URL'       => 'url',
+        'MIX_DOMAIN'    => 'domain',
         'DB_CONNECTION' => 'connection',
         'DB_HOST'       => 'host',
         'DB_PORT'       => 'port',
@@ -147,6 +148,7 @@ class NetworkConfigCommand extends Command
             $this->line("Hi {$this->user_name}! Great to have you on board :)");
 
             $this->url = $this->ask('What URL is your network accessible from?', 'http://localhost/network');
+            $this->domain = str_replace(['http', 'https', '://'], ['','',''], $this->url);
 
             $this->line("Site URL set to {$this->url}.");
         }
