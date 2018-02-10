@@ -48,5 +48,10 @@
                 "SimonHamp\\NetworkElements\\Providers\\NetworkServiceProvider"
             ]
         }
+    },
+    "scripts": {
+        "post-package-update": [
+            "@php artisan vendor:publish --provider=SimonHamp\NetworkElements\Providers\NetworkServiceProvider --force"
+        ]
     }
 }
