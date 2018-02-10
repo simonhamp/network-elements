@@ -14,8 +14,7 @@
         "grimzy/laravel-mysql-spatial": "^1.0",
         "hackzilla/password-generator": "^1.4",
         "illuminate/support": "^5.5",
-        "pelim/laravel-zmq": "^1.0",
-        "vinkla/hashids": "^3.2"
+        "pelim/laravel-zmq": "^1.0"
     },
     "require-dev": {
         "filp/whoops": "~2.0",
