@@ -15,6 +15,8 @@
                     @endif
 
                     You are logged in!
+
+                    <new-post></new-post>
                 </div>
             </div>
         </div>
