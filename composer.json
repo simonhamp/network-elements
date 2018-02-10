@@ -11,11 +11,9 @@
     "require": {
         "php": ">=7.0.0",
         "askedio/laravel-ratchet": "^1.0",
-        "fideloper/proxy": "~3.3",
         "grimzy/laravel-mysql-spatial": "^1.0",
         "hackzilla/password-generator": "^1.4",
-        "laravel/framework": "5.5.*",
-        "laravel/tinker": "~1.0",
+        "illuminate/support": "^5.5",
         "pelim/laravel-zmq": "^1.0",
         "vinkla/hashids": "^3.2"
     },
