@@ -10,17 +10,17 @@
     ],
     "require": {
         "php": ">=7.0.0",
-        "askedio/laravel-ratchet": "^1.0",
-        "grimzy/laravel-mysql-spatial": "^1.0",
+        "beyondcode/laravel-websockets": "^1.1",
         "hackzilla/password-generator": "^1.4",
-        "illuminate/support": "^5.5",
-        "pelim/laravel-zmq": "^1.0"
+        "valorin/pwned-validator": "^1.2"
     },
     "require-dev": {
-        "filp/whoops": "~2.0",
-        "fzaninotto/faker": "~1.4",
-        "mockery/mockery": "~1.0",
-        "phpunit/phpunit": "~6.0"
+        "beyondcode/laravel-dump-server": "^1.0",
+        "filp/whoops": "^2.0",
+        "fzaninotto/faker": "^1.4",
+        "mockery/mockery": "^1.0",
+        "nunomaduro/collision": "^3.0",
+        "phpunit/phpunit": "^7.5"
     },
     "autoload": {
         "psr-4": {

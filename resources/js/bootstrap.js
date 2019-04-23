@@ -1,4 +1,3 @@
-
 window._ = require('lodash');
 
 /**
@@ -8,9 +7,10 @@ window._ = require('lodash');
  */
 
 try {
+    window.Popper = require('popper.js').default;
     window.$ = window.jQuery = require('jquery');
 
-    require('bootstrap-sass');
+    require('bootstrap');
 } catch (e) {}
 
 /**
@@ -43,9 +43,13 @@ if (token) {
  * allows your team to easily build robust real-time web applications.
  */
 
-import Echo from 'laravel-echo-ratchet'
+// import Echo from 'laravel-echo'
 
-window.Echo = new Echo({
-    broadcaster: 'ratchet',
-    host: 'ws://0.0.0.0:8080',
-});
+// window.Pusher = require('pusher-js');
+
+// window.Echo = new Echo({
+//     broadcaster: 'pusher',
+//     key: process.env.MIX_PUSHER_APP_KEY,
+//     cluster: process.env.MIX_PUSHER_APP_CLUSTER,
+//     encrypted: true
+// });
