@@ -2,6 +2,7 @@
 
 namespace SimonHamp\NetworkElements\Providers;
 
+use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
 use SimonHamp\NetworkElements\Console\Commands\NetworkUserCommand;
 use SimonHamp\NetworkElements\Console\Commands\NetworkConfigCommand;
@@ -46,10 +47,15 @@ class NetworkServiceProvider extends ServiceProvider
     private function loadRoutes()
     {
         // Load web routes
-        $this->loadRoutesFrom($this->packagePathTo('routes/web.php'));
+        Route::middleware('web')
+            ->namespace('SimonHamp\\NetworkElements\\Http\\Controllers')
+            ->group($this->packagePathTo('routes/web.php'));
 
         // Load API routes
-        $this->loadRoutesFrom($this->packagePathTo('routes/api.php'));
+        Route::prefix('api')
+             ->middleware('auth')
+             ->namespace('SimonHamp\\NetworkElements\\Http\\Controllers')
+             ->group($this->packagePathTo('routes/api.php'));
 
         // Load Broadcast channel auth routes
         $this->loadRoutesFrom($this->packagePathTo('routes/channels.php'));
