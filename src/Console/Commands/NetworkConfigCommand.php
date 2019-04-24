@@ -148,7 +148,7 @@ class NetworkConfigCommand extends Command
             $this->line("Hi {$this->user_name}! Great to have you on board :)");
 
             $this->url = $this->ask('What URL is your network accessible from?', 'http://localhost/network');
-            $this->domain = str_replace(['http', 'https', '://'], ['','',''], $this->url);
+            $this->domain = str_replace(['https', 'http', '://'], ['','',''], $this->url);
 
             $this->line("Site URL set to {$this->url}.");
         }
@@ -165,6 +165,13 @@ class NetworkConfigCommand extends Command
             $dbServer = $this->validConnections[$this->connection];
 
             $this->line("Database connection set to {$dbServer}.");
+
+            $connection_config = [
+                $this->connection => [
+                    'driver' => $this->connection,
+                    'database' => $this->database,
+                ],
+            ];
 
             if ($this->connection !== 'sqlite') {
                 $this->host = $this->anticipate('What host is your database on? (IP address or hostname)', ['localhost', '127.0.0.1'], 'localhost');
@@ -183,22 +190,24 @@ class NetworkConfigCommand extends Command
 
                 $this->password = $this->secret("What is that user's password? (Leave blank for no password)", true, true) ?? '';
                 $this->line('Database user password set.');
+
+                $connection_config = [
+                    $this->connection => [
+                        'driver' => $this->connection,
+                        'host' => $this->host,
+                        'port' => $this->port,
+                        'database' => $this->database,
+                        'username' => $this->username,
+                        'password' => $this->password,
+                    ],
+                ];
             }
 
             // Adjust current config so we can use these settings in the current request
             config([
                 'database' => [
                     'default' => $this->connection,
-                    'connections' => [
-                        $this->connection => [
-                            'driver' => $this->connection,
-                            'host' => $this->host,
-                            'port' => $this->port,
-                            'database' => $this->database,
-                            'username' => $this->username,
-                            'password' => $this->password,
-                        ],
-                    ],
+                    'connections' => $connection_config,
                 ],
                 'app' => array_merge(config('app'), [
                     'name' => $this->name,
@@ -246,6 +255,9 @@ class NetworkConfigCommand extends Command
 
         // Make the symlinks we need
         $this->createSymlinks();
+
+        // Publish the Network assets from network-elements
+        $this->publishAssets();
 
         sleep(1);
 
@@ -348,8 +360,9 @@ class NetworkConfigCommand extends Command
         if (! file_exists($envPath)) {
             // Create the .env file from the example file
             copy($envPath.'.example', $envPath);
-            $this->callSilent('key:generate', ['--force' => true]);
         }
+
+        $this->callSilent('key:generate', ['--force' => true]);
 
         $env = file_get_contents($envPath);
 
@@ -362,7 +375,7 @@ class NetworkConfigCommand extends Command
 
             $env = preg_replace(
                 $this->keyReplacementPattern($key),
-                $key.'='.(is_string($this->$var) ? '"'.$this->$var.'"' : $this->$var),
+                $key.'='.(strpos($this->$var, " ") !== false ? '"'.$this->$var.'"' : $this->$var),
                 $env,
                 1
             );
@@ -380,24 +393,16 @@ class NetworkConfigCommand extends Command
         if (! file_exists(public_path('storage'))) {
             $this->call('storage:link');
         }
+    }
 
-        // Symlink the public assets folder
-        if (! is_link($sitePath = public_path('network'))) {
-            $this->info('Symlinking public assets...');
-            $vendorPath = base_path('vendor/simonhamp/network-elements/public/');
-            $createSymlink = new Process('ln -s "'.$vendorPath.'" "'.$sitePath.'"');
-            $createSymlink->run();
-
-            if (! $createSymlink->isSuccessful()) {
-                $this->warn("I couldn't create a symlink to the Network public assets (CSS, JavaScript, fonts and images.");
-                $this->warn("Please create a symlink to {$vendorPath} at {$sitePath}");
-                logger('NETWORK.INSTALL: Failed to symlink public assets.', ['paths' => [$vendorPath, $sitePath]]);
-                $this->hasError = true;
-                return;
-            }
-
-            $this->info('Symlinking created successfully!');
-        }
+    protected function publishAssets()
+    {
+        $this->call('vendor:publish',
+            [
+                '--provider' => 'SimonHamp\\NetworkElements\\Providers\\NetworkServiceProvider',
+                '--force' => true
+            ]
+        );
     }
 
     /**
