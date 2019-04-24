@@ -28,6 +28,7 @@ class NetworkServiceProvider extends ServiceProvider
 
         // Merge config
         $this->mergeConfigFrom($this->packagePathTo('config/network.php'), 'network');
+        $this->mergeConfigFrom($this->packagePathTo('config/websockets.php'), 'websockets');
 
         // Load routes
         $this->loadRoutes();
@@ -63,7 +64,11 @@ class NetworkServiceProvider extends ServiceProvider
 
         // Config
         $this->publishes([
-            $this->packagePathTo('config/network.php') => config_path($this->namespace.'.php'),
+            $this->packagePathTo('config/network.php') => config_path('network.php'),
+        ], 'config');
+
+        $this->publishes([
+            $this->packagePathTo('config/websockets.php') => config_path('websockets.php'),
         ], 'config');
 
         // Migrations
@@ -78,7 +83,11 @@ class NetworkServiceProvider extends ServiceProvider
 
         // Source Assets
         $this->publishes([
-            $this->packagePathTo('resources/assets') => public_path('resources/assets/vendor/'.$this->namespace),
+            $this->packagePathTo('resources/js') => resource_path('js/vendor/'.$this->namespace),
+        ], 'assets');
+
+        $this->publishes([
+            $this->packagePathTo('resources/sass') => resource_path('sass/vendor/'.$this->namespace),
         ], 'assets');
 
         // Compiled Assets
