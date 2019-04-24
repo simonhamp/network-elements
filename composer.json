@@ -10,6 +10,7 @@
     ],
     "require": {
         "php": ">=7.0.0",
+        "ext-pdo": "*",
         "beyondcode/laravel-websockets": "^1.1",
         "hackzilla/password-generator": "^1.4",
         "valorin/pwned-validator": "^1.2"
