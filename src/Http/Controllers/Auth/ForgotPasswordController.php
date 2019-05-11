@@ -2,6 +2,7 @@
 
 namespace SimonHamp\NetworkElements\Http\Controllers\Auth;
 
+use Illuminate\Http\Request;
 use Illuminate\Foundation\Auth\SendsPasswordResetEmails;
 use SimonHamp\NetworkElements\Http\Controllers\Controller;
 
@@ -47,7 +48,7 @@ class ForgotPasswordController extends Controller
      * @param  string  $response
      * @return \Illuminate\Http\RedirectResponse|\Illuminate\Http\JsonResponse
      */
-    protected function sendResetLinkResponse($response)
+    protected function sendResetLinkResponse($request, $response)
     {
         return back()->with('status', trans('network::'.$response));
     }

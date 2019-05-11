@@ -2,6 +2,7 @@
 
 namespace SimonHamp\NetworkElements\Http\Controllers\Auth;
 
+use Illuminate\Http\Request;
 use Illuminate\Foundation\Auth\ResetsPasswords;
 use SimonHamp\NetworkElements\Http\Controllers\Controller;
 
@@ -59,7 +60,7 @@ class ResetPasswordController extends Controller
      * @param  string  $response
      * @return \Illuminate\Http\RedirectResponse|\Illuminate\Http\JsonResponse
      */
-    protected function sendResetResponse($response)
+    protected function sendResetResponse($request, $response)
     {
         return redirect($this->redirectPath())
                             ->with('status', trans('network::'.$response));
