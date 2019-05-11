@@ -13,6 +13,7 @@
         "ext-pdo": "*",
         "beyondcode/laravel-websockets": "^1.1",
         "hackzilla/password-generator": "^1.4",
+        "pusher/pusher-php-server": "~3.0",
         "valorin/pwned-validator": "^1.2"
     },
     "require-dev": {
