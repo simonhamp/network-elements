@@ -14,8 +14,8 @@ window.Vue = require('vue');
  * or customize the JavaScript scaffolding to fit your unique needs.
  */
 
-Vue.component('new-post', require('./components/NewPost.vue'));
-Vue.component('timeline', require('./components/Timeline.vue'));
+Vue.component('new-post', require('./components/NewPost.vue').default);
+Vue.component('timeline', require('./components/Timeline.vue').default);
 
 const app = new Vue({
     el: '#app'
