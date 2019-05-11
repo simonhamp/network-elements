@@ -22,7 +22,7 @@
         },
         methods: {
             send() {
-                axios.post('/posts', {"content": this.content});
+                axios.post('/api/posts', {"content": this.content});
             }
         }
     }

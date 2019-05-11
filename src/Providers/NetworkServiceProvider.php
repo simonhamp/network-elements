@@ -53,7 +53,7 @@ class NetworkServiceProvider extends ServiceProvider
 
         // Load API routes
         Route::prefix('api')
-             ->middleware('auth')
+             ->middleware('web')
              ->namespace('SimonHamp\\NetworkElements\\Http\\Controllers')
              ->group($this->packagePathTo('routes/api.php'));
 
